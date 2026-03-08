@@ -1,0 +1,46 @@
+# Env files
+.env
+.env.*
+backend/.env
+frontend/.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+backend/.venv/
+backend/.venv313/
+
+# Node / frontend
+node_modules/
+frontend/node_modules/
+dist/
+frontend/dist/
+build/
+frontend/build/
+.vite/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# Optional local data/artifacts
+backend/data/*.pkl
+backend/data/*.joblib

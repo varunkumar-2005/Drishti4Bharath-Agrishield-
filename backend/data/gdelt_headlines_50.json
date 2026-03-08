@@ -1,0 +1,32 @@
+[
+  {
+    "headline": "India explores alternate edible oil routes amid Red Sea shipping disruptions",
+    "url": "https://example.com/news-1",
+    "country": "GLOBAL",
+    "avg_tone": -2.4
+  },
+  {
+    "headline": "New export tariff discussions may impact Indian rice trade in West Asia",
+    "url": "https://example.com/news-2",
+    "country": "IRAN",
+    "avg_tone": -3.1
+  },
+  {
+    "headline": "Fertilizer shipment delays raise kharif season cost concerns for farmers",
+    "url": "https://example.com/news-3",
+    "country": "GLOBAL",
+    "avg_tone": -2.7
+  },
+  {
+    "headline": "Conflict-linked insurance premiums rise for commodity shipping lanes",
+    "url": "https://example.com/news-4",
+    "country": "GLOBAL",
+    "avg_tone": -3.5
+  },
+  {
+    "headline": "Indian spice exporters evaluate rerouting options after sanctions update",
+    "url": "https://example.com/news-5",
+    "country": "UAE",
+    "avg_tone": -1.8
+  }
+]
