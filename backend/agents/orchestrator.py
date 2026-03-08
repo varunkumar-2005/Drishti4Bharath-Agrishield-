@@ -9,6 +9,7 @@ AgentOrchestrator — coordinates the 5-agent AgroShield pipeline:
 
 import asyncio
 import logging
+import os
 from typing import Any, Dict, List, Optional
 
 from agents.event_collector import EventCollector
@@ -20,6 +21,7 @@ from utils.data_loader import DataLoader
 from utils.store import InMemoryStore
 
 logger = logging.getLogger("agroshield.orchestrator")
+DROP_LOW_RISK_EVENTS = os.getenv("DROP_LOW_RISK_EVENTS", "true").lower() == "true"
 
 
 class AgentOrchestrator:
@@ -87,8 +89,13 @@ class AgentOrchestrator:
             # Agent 3: predict risk level
             prediction = self.predictor.predict(structured, country_stats)
 
-            # Skip very low-risk events unless forced
-            if not force and prediction.get("risk_label") == "LOW" and prediction.get("risk_score", 0) < 25:
+            # Skip very low-risk events unless forced/configured otherwise.
+            if (
+                DROP_LOW_RISK_EVENTS
+                and not force
+                and prediction.get("risk_label") == "LOW"
+                and prediction.get("risk_score", 0) < 25
+            ):
                 return
 
             # Agent 4: derive cascading impact

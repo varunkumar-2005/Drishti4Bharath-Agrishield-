@@ -23,6 +23,12 @@ TABLES = [
         "AttributeDefinitions": [{"AttributeName": "advisory_id", "AttributeType": "S"}],
         "BillingMode": "PAY_PER_REQUEST",
     },
+    {
+        "TableName": "agroshield-chat-logs",
+        "KeySchema": [{"AttributeName": "chat_id", "KeyType": "HASH"}],
+        "AttributeDefinitions": [{"AttributeName": "chat_id", "AttributeType": "S"}],
+        "BillingMode": "PAY_PER_REQUEST",
+    },
 ]
 
 for table in TABLES:

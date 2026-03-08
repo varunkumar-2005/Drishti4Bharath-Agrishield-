@@ -18,6 +18,7 @@ S3_BUCKET = os.getenv("S3_BUCKET", "agroshield-trade-data")
 MODEL_KEY = os.getenv("MODEL_KEY", "model-artifacts/risk_model.pkl")
 ENCODERS_KEY = os.getenv("ENCODERS_KEY", "model-artifacts/encoders.pkl")
 FEATURES_KEY = os.getenv("FEATURES_KEY", "model-artifacts/feature_columns.pkl")
+MODEL_SOURCE = os.getenv("MODEL_SOURCE", "auto").strip().lower()  # auto | s3 | local
 
 RISK_LABELS = ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
 
@@ -46,34 +47,48 @@ class RiskPredictor:
 
     def _load_model(self):
         """Try loading XGBoost model from S3, then local disk."""
-        # Try S3
-        try:
-            import boto3
-            s3 = boto3.client("s3", region_name=os.getenv("AWS_REGION", "ap-south-1"))
-            model_obj = s3.get_object(Bucket=S3_BUCKET, Key=MODEL_KEY)
-            self.model = pickle.loads(model_obj["Body"].read())
+        if MODEL_SOURCE in {"auto", "s3"}:
             try:
-                enc_obj = s3.get_object(Bucket=S3_BUCKET, Key=ENCODERS_KEY)
-                self.encoders = pickle.loads(enc_obj["Body"].read())
-                feat_obj = s3.get_object(Bucket=S3_BUCKET, Key=FEATURES_KEY)
-                self.feature_columns = pickle.loads(feat_obj["Body"].read())
-            except Exception:
-                pass
-            logger.info("XGBoost model loaded from S3")
-            return
-        except Exception as exc:
-            logger.warning("S3 model load failed: %s", exc)
-
-        # Try local
-        local_model = os.path.join(os.path.dirname(__file__), "..", "data", "risk_model.pkl")
-        if os.path.exists(local_model):
-            try:
-                with open(local_model, "rb") as f:
-                    self.model = pickle.load(f)
-                logger.info("XGBoost model loaded from local disk")
+                import boto3
+                s3 = boto3.client("s3", region_name=os.getenv("AWS_REGION", "ap-south-1"))
+                model_obj = s3.get_object(Bucket=S3_BUCKET, Key=MODEL_KEY)
+                self.model = pickle.loads(model_obj["Body"].read())
+                try:
+                    enc_obj = s3.get_object(Bucket=S3_BUCKET, Key=ENCODERS_KEY)
+                    self.encoders = pickle.loads(enc_obj["Body"].read())
+                    feat_obj = s3.get_object(Bucket=S3_BUCKET, Key=FEATURES_KEY)
+                    self.feature_columns = pickle.loads(feat_obj["Body"].read())
+                except Exception:
+                    pass
+                logger.info("XGBoost model loaded from S3")
                 return
             except Exception as exc:
-                logger.warning("Local model load failed: %s", exc)
+                logger.warning("S3 model load failed: %s", exc)
+                if MODEL_SOURCE == "s3":
+                    logger.error("MODEL_SOURCE=s3 so local fallback is disabled")
+                    return
+
+        if MODEL_SOURCE in {"auto", "local"}:
+            data_dir = os.path.join(os.path.dirname(__file__), "..", "data")
+            local_model = os.path.join(data_dir, "risk_model.pkl")
+            local_features = os.path.join(data_dir, "feature_columns.pkl")
+            local_encoders = os.path.join(data_dir, "encoders.pkl")
+            if os.path.exists(local_model):
+                try:
+                    with open(local_model, "rb") as f:
+                        self.model = pickle.load(f)
+                    if os.path.exists(local_features):
+                        with open(local_features, "rb") as f:
+                            loaded = pickle.load(f)
+                            if isinstance(loaded, list) and loaded:
+                                self.feature_columns = loaded
+                    if os.path.exists(local_encoders):
+                        with open(local_encoders, "rb") as f:
+                            self.encoders = pickle.load(f)
+                    logger.info("XGBoost model loaded from local disk")
+                    return
+                except Exception as exc:
+                    logger.warning("Local model load failed: %s", exc)
 
         logger.info("No XGBoost model found — using rule-based fallback")
 
@@ -169,12 +184,31 @@ class RiskPredictor:
     def _ml_predict(self, features: Dict[str, float]) -> Dict[str, Any]:
         try:
             cols = self.feature_columns if self.feature_columns else DEFAULT_FEATURE_COLUMNS
+            expected = int(getattr(self.model, "n_features_in_", len(cols)))
+            if len(cols) != expected:
+                logger.warning(
+                    "Feature count mismatch config=%d model=%d; auto-aligning with zero-filled placeholders",
+                    len(cols), expected
+                )
+                if len(cols) < expected:
+                    cols = cols + [f"__auto_feature_{i}" for i in range(len(cols), expected)]
+                else:
+                    cols = cols[:expected]
             X = np.array([[features.get(c, 0.0) for c in cols]])
             proba = self.model.predict_proba(X)[0]
             pred_class = int(np.argmax(proba))
-            risk_label = RISK_LABELS[pred_class] if pred_class < len(RISK_LABELS) else "MEDIUM"
+            model_label = RISK_LABELS[pred_class] if pred_class < len(RISK_LABELS) else "MEDIUM"
             confidence = float(proba[pred_class])
-            risk_score = self._proba_to_score(proba)
+            ml_score = self._proba_to_score(proba)
+            signal_score = self._signal_score(features)
+            # Hybrid score: blend model probability with event/country feature signal.
+            risk_score = int(round((0.45 * ml_score) + (0.55 * signal_score)))
+            score_label = self._score_to_label(risk_score)
+            risk_label = (
+                score_label
+                if self._label_rank(score_label) > self._label_rank(model_label)
+                else model_label
+            )
             return {
                 "risk_label": risk_label,
                 "risk_score": risk_score,
@@ -240,3 +274,42 @@ class RiskPredictor:
         weights = [10, 40, 70, 95]
         score = sum(float(p) * w for p, w in zip(proba, weights[:len(proba)]))
         return min(int(score), 100)
+
+    def _signal_score(self, features: Dict[str, float]) -> int:
+        """Feature-driven score for event intensity; keeps local demo outputs varied."""
+        shock = float(features.get("Effective_Shock", 0.0))
+        goldstein = abs(float(features.get("Avg_Goldstein", 0.0)))
+        tone = abs(float(features.get("Avg_Tone", 0.0)))
+        trade_exposure = float(features.get("Trade_Shock_Exposure", 0.0))
+        hostility = abs(float(features.get("Net_Hostility_Exposure", 0.0)))
+        mentions = float(features.get("Total_Mentions", 100.0))
+        severity_proxy = max(0.0, min((mentions / 100.0 - 1.0) / 5.0, 1.0))
+
+        shock_n = min(shock / 90.0, 1.0)
+        gold_n = min(goldstein / 10.0, 1.0)
+        tone_n = min(tone / 8.0, 1.0)
+        exposure_n = min(trade_exposure * 30.0, 1.0)
+        hostility_n = min(hostility * 8.0, 1.0)
+
+        score = (
+            (shock_n * 32.0)
+            + (gold_n * 20.0)
+            + (tone_n * 8.0)
+            + (severity_proxy * 25.0)
+            + (exposure_n * 10.0)
+            + (hostility_n * 5.0)
+        )
+        return max(5, min(int(round(score)), 100))
+
+    def _score_to_label(self, score: int) -> str:
+        if score >= 80:
+            return "CRITICAL"
+        if score >= 60:
+            return "HIGH"
+        if score >= 35:
+            return "MEDIUM"
+        return "LOW"
+
+    def _label_rank(self, label: str) -> int:
+        order = {"LOW": 1, "MEDIUM": 2, "HIGH": 3, "CRITICAL": 4}
+        return order.get(str(label).upper(), 0)

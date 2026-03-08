@@ -46,9 +46,9 @@ function AdvisoryPanel({ advisory }) {
       <PanelHeader
         title={`🤖 ${advisory.headline?.slice(0, 70) || 'Advisory'}…`}
         right={
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <RiskPill label={advisory.risk_label} />
-            <span className="text-[9px]" style={{ color: 'var(--accent)' }}>
+            <span className="text-[11px] font-medium" style={{ color: 'var(--accent)' }}>
               {advisory.model_used?.includes('claude') ? 'Claude Sonnet' :
                 advisory.model_used?.includes('nova') ? 'Nova Lite' : 'Rule-based'} · {timeAgo(advisory.generated_at)}
             </span>
@@ -58,14 +58,14 @@ function AdvisoryPanel({ advisory }) {
 
       {/* Summary */}
       {advisory.summary && (
-        <div className="px-5 py-3 text-[12px] leading-relaxed font-serif border-b"
+        <div className="px-5 py-4 text-[14px] leading-relaxed font-serif border-b"
           style={{ borderColor: 'var(--border)', color: 'var(--muted)', background: 'rgba(0,0,0,.15)' }}>
           {advisory.summary}
         </div>
       )}
 
       {/* Meta row */}
-      <div className="flex gap-4 px-5 py-2.5 border-b text-[10px]"
+      <div className="flex gap-4 px-5 py-3 border-b text-[12px]"
         style={{ borderColor: 'var(--border)', color: 'var(--muted)' }}>
         <span>📍 {advisory.primary_country}</span>
         <span>🌾 {(advisory.affected_commodities || []).slice(0, 3).join(', ')}</span>
@@ -78,7 +78,7 @@ function AdvisoryPanel({ advisory }) {
       <div className="flex border-b" style={{ borderColor: 'var(--border)' }}>
         {TABS.map(tab => (
           <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-            className="px-4 py-2.5 text-[11px] uppercase tracking-wider border-b-2 transition-all cursor-pointer"
+            className="px-5 py-3 text-[13px] uppercase tracking-wider border-b-2 transition-all cursor-pointer font-bold"
             style={{
               borderBottomColor: activeTab === tab.id ? 'var(--accent)' : 'transparent',
               color: activeTab === tab.id ? 'var(--accent)' : 'var(--muted)',
@@ -108,10 +108,10 @@ export default function Advisories() {
 
   return (
     <div className="p-7 animate-fadeIn">
-      <div className="font-syne font-extrabold text-[18px] mb-1" style={{ color: 'var(--text)' }}>
+      <div className="font-syne font-extrabold text-[22px] mb-2" style={{ color: 'var(--text)' }}>
         AI-Generated Advisories
       </div>
-      <div className="text-[11px] mb-5" style={{ color: 'var(--muted)' }}>
+      <div className="text-[14px] mb-6" style={{ color: 'var(--muted)' }}>
         Amazon Bedrock (Claude Sonnet / Nova Lite) — Actionable intelligence per stakeholder group
       </div>
 

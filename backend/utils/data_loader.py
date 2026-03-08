@@ -6,18 +6,22 @@ computes per-country and per-commodity stats used by agents.
 import io
 import logging
 import os
+import re
 from collections import defaultdict
 from typing import Any, Dict, List, Optional
 
 import boto3
 import numpy as np
 import pandas as pd
+from botocore.config import Config
 
 logger = logging.getLogger("agroshield.data_loader")
 
 S3_BUCKET = os.getenv("S3_BUCKET", "agroshield-trade-data")
 S3_KEY = os.getenv("S3_KEY", "raw-data/trade_dataset.csv")
 LOCAL_CSV = os.getenv("LOCAL_CSV", "data/trade_dataset.csv")
+LOAD_FROM_S3 = os.getenv("LOAD_FROM_S3", "true").lower() == "true"
+REQUIRE_S3_DATA = os.getenv("REQUIRE_S3_DATA", "false").lower() == "true"
 
 
 class DataLoader:
@@ -31,9 +35,15 @@ class DataLoader:
     async def load(self):
         """Load trade data from S3 or local CSV."""
         try:
-            self.df = self._load_from_s3()
-            logger.info("Loaded %d rows from S3", len(self.df))
+            if LOAD_FROM_S3:
+                self.df = self._load_from_s3()
+                logger.info("Loaded %d rows from S3", len(self.df))
+            else:
+                raise RuntimeError("S3 loading disabled by LOAD_FROM_S3=false")
         except Exception as exc:
+            if REQUIRE_S3_DATA:
+                logger.error("S3 load failed and REQUIRE_S3_DATA=true: %s", exc)
+                raise
             logger.warning("S3 load failed (%s), trying local CSV …", exc)
             try:
                 self.df = pd.read_csv(LOCAL_CSV)
@@ -47,7 +57,11 @@ class DataLoader:
         self.loaded = True
 
     def _load_from_s3(self) -> pd.DataFrame:
-        s3 = boto3.client("s3", region_name=os.getenv("AWS_REGION", "ap-south-1"))
+        s3 = boto3.client(
+            "s3",
+            region_name=os.getenv("AWS_REGION", "ap-south-1"),
+            config=Config(connect_timeout=3, read_timeout=8, retries={"max_attempts": 1}),
+        )
         obj = s3.get_object(Bucket=S3_BUCKET, Key=S3_KEY)
         return pd.read_csv(io.BytesIO(obj["Body"].read()))
 
@@ -198,3 +212,84 @@ class DataLoader:
                 "avg_mom_change": round(stats.get("avg_mom_change", 0), 4),
             })
         return sorted(result, key=lambda x: -x["total_value_usd"])
+
+    def get_trade_facts(
+        self,
+        crop: Optional[str] = None,
+        country: Optional[str] = None,
+        limit: int = 5,
+    ) -> List[Dict[str, Any]]:
+        """Get recent high-value trade facts for grounding LLM responses."""
+        if self.df is None or self.df.empty:
+            return []
+
+        df = self.df.copy()
+        if crop and "Commodity" in df.columns:
+            crop_q = str(crop).strip()
+            if crop_q:
+                pattern = re.escape(crop_q)
+                df = df[df["Commodity"].astype(str).str.contains(pattern, case=False, na=False)]
+
+        if country and "Country" in df.columns:
+            key = str(country).strip().upper()
+            aliases = {
+                "USA": ["USA", "UNITED STATES", "US", "U.S."],
+                "UK": ["UK", "UNITED KINGDOM", "GREAT BRITAIN", "BRITAIN"],
+                "UAE": ["UAE", "UNITED ARAB EMIRATES"],
+                "EU": ["EU", "EUROPEAN UNION"],
+            }
+            candidates = aliases.get(key, [key])
+            df = df[df["Country"].astype(str).str.upper().isin(candidates)]
+
+        if df.empty:
+            return []
+
+        if "Year" in df.columns and "Month" in df.columns:
+            df = df.sort_values(by=["Year", "Month"], ascending=[False, False])
+        if "Value_USD" in df.columns:
+            df = df.sort_values(by=["Value_USD"], ascending=False)
+
+        keep_cols = [
+            "Country", "Commodity", "Trade_Type", "Value_USD", "Trade_Share",
+            "MoM_Change_Value", "Shock_Intensity", "Avg_Goldstein",
+            "Avg_Tone", "Rolling_3M_Volatility", "Year", "Month",
+        ]
+        cols = [c for c in keep_cols if c in df.columns]
+        out: List[Dict[str, Any]] = []
+        for _, row in df.head(max(limit, 1))[cols].iterrows():
+            item = {}
+            for c in cols:
+                v = row[c]
+                if hasattr(v, "item"):
+                    v = v.item()
+                if isinstance(v, float):
+                    if c in {"Trade_Share", "MoM_Change_Value", "Shock_Intensity", "Avg_Goldstein", "Avg_Tone", "Rolling_3M_Volatility"}:
+                        v = round(v, 4)
+                    else:
+                        v = round(v, 2)
+                item[c] = v
+            out.append(item)
+        return out
+
+    def get_top_commodities_for_country(self, country: str, limit: int = 6) -> List[str]:
+        """Return top traded commodities for a country from the raw dataset."""
+        if self.df is None or self.df.empty or "Country" not in self.df.columns or "Commodity" not in self.df.columns:
+            return []
+        key = str(country).strip().upper()
+        aliases = {
+            "USA": ["USA", "UNITED STATES", "US", "U.S."],
+            "UK": ["UK", "UNITED KINGDOM", "GREAT BRITAIN", "BRITAIN"],
+            "UAE": ["UAE", "UNITED ARAB EMIRATES"],
+            "EU": ["EU", "EUROPEAN UNION"],
+            "SOUTH KOREA": ["SOUTH KOREA", "KOREA, REPUBLIC OF", "REPUBLIC OF KOREA"],
+        }
+        candidates = aliases.get(key, [key])
+        upper_country = self.df["Country"].astype(str).str.upper()
+        country_df = self.df[upper_country.isin(candidates)]
+        if country_df.empty:
+            return []
+        if "Value_USD" in country_df.columns:
+            ranked = country_df.groupby("Commodity")["Value_USD"].sum().sort_values(ascending=False)
+        else:
+            ranked = country_df["Commodity"].value_counts()
+        return [str(c) for c in ranked.head(max(limit, 1)).index.tolist() if str(c).strip()]

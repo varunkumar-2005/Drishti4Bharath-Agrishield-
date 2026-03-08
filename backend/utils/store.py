@@ -6,6 +6,7 @@ also persists to DynamoDB when configured.
 import json
 import logging
 import os
+import uuid
 from collections import deque
 from datetime import datetime
 from typing import Any, Dict, List
@@ -14,9 +15,11 @@ logger = logging.getLogger("agroshield.store")
 
 MAX_EVENTS = 100
 MAX_ADVISORIES = 50
+MAX_CHAT_LOGS = 200
 
 DYNAMO_EVENTS_TABLE = os.getenv("DYNAMO_EVENTS_TABLE", "agroshield-events")
 DYNAMO_ADVISORIES_TABLE = os.getenv("DYNAMO_ADVISORIES_TABLE", "agroshield-advisories")
+DYNAMO_CHAT_TABLE = os.getenv("DYNAMO_CHAT_TABLE", "agroshield-chat-logs")
 USE_DYNAMO = os.getenv("USE_DYNAMO", "false").lower() == "true"
 
 
@@ -24,6 +27,7 @@ class InMemoryStore:
     def __init__(self):
         self._events: deque = deque(maxlen=MAX_EVENTS)
         self._advisories: deque = deque(maxlen=MAX_ADVISORIES)
+        self._chat_logs: deque = deque(maxlen=MAX_CHAT_LOGS)
         self._seen_event_ids: set = set()
         self._dynamo = None
         if USE_DYNAMO:
@@ -66,6 +70,20 @@ class InMemoryStore:
 
     def advisory_count(self) -> int:
         return len(self._advisories)
+
+    # —— Chat logs ———————————————————————————————————————————————————————————————
+    def add_chat_log(self, chat: Dict[str, Any]):
+        if not chat.get("chat_id"):
+            chat["chat_id"] = str(uuid.uuid4())
+        chat["stored_at"] = datetime.utcnow().isoformat() + "Z"
+        self._chat_logs.appendleft(chat)
+        self._persist_chat(chat)
+
+    def get_chat_logs(self, limit: int = 50) -> List[Dict]:
+        return list(self._chat_logs)[:limit]
+
+    def chat_count(self) -> int:
+        return len(self._chat_logs)
 
     # ── Dashboard KPIs ─────────────────────────────────────────────────────────
     def get_dashboard_kpis(self) -> Dict[str, Any]:
@@ -126,3 +144,13 @@ class InMemoryStore:
                                   "data": json.dumps(advisory, default=str)})
         except Exception as exc:
             logger.debug("DynamoDB advisory persist failed: %s", exc)
+
+    def _persist_chat(self, chat: Dict):
+        if not self._dynamo:
+            return
+        try:
+            table = self._dynamo.Table(DYNAMO_CHAT_TABLE)
+            table.put_item(Item={"chat_id": chat.get("chat_id", "unknown"),
+                                  "data": json.dumps(chat, default=str)})
+        except Exception as exc:
+            logger.debug("DynamoDB chat persist failed: %s", exc)

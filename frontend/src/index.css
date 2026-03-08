@@ -14,9 +14,9 @@
   --accent3: #3d9eff;
   --warn: #ffb800;
   --danger: #ff3d5a;
-  --text: #e8f4f8;
-  --muted: #5a7a94;
-  --dim: #2a4060;
+  --text: #ffffff;
+  --muted: #a3b8cc;
+  --dim: #445c7d;
 }
 
 * {
@@ -29,7 +29,7 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-primary);
-  font-size: 17px;
+  font-size: 19px;
   min-height: 100vh;
   overflow-x: hidden;
 }

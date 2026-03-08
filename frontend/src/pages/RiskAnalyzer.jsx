@@ -1,4 +1,4 @@
-import React from 'react'
+﻿import React from 'react'
 import { usePolling } from '../hooks/usePolling'
 import { fetchEvents, fetchCommodities } from '../utils/api'
 import { Panel, PanelHeader, KpiCard, RiskPill, Spinner, Empty, fmtUSD } from '../components/ui'
@@ -35,11 +35,11 @@ export default function RiskAnalyzer() {
 
   return (
     <div className="p-7 animate-fadeIn">
-      <div className="font-syne font-extrabold text-[18px] mb-1" style={{ color: 'var(--text)' }}>
-        Export–Import Risk Analyzer
+      <div className="font-syne font-extrabold text-[20px] mb-1" style={{ color: 'var(--text)' }}>
+        Export-Import Risk Analyzer
       </div>
-      <div className="text-[11px] mb-5" style={{ color: 'var(--muted)' }}>
-        XGBoost ML model · Trained on India bilateral trade dataset · Rule-based fallback
+      <div className="text-[12px] mb-5" style={{ color: 'var(--muted)' }}>
+        XGBoost ML model - Trained on India bilateral trade dataset - Rule-based fallback
       </div>
 
       <div className="grid grid-cols-4 gap-4 mb-6">
@@ -58,7 +58,7 @@ export default function RiskAnalyzer() {
           {/* Commodity risk matrix */}
           <Panel className="mb-5">
             <PanelHeader title="Commodity Risk Matrix"
-              right={<span className="text-[10px]" style={{ color: 'var(--muted)' }}>Shock × Trade Share</span>} />
+              right={<span className="text-[10px]" style={{ color: 'var(--muted)' }}>Shock Ã— Trade Share</span>} />
             <div className="grid px-5 py-2.5 text-[9px] uppercase tracking-wider border-b"
               style={{ gridTemplateColumns: '1fr 90px 80px 80px 80px', color: 'var(--muted)', borderColor: 'var(--border)' }}>
               <span>Commodity</span><span>Trade Share</span><span>Avg Shock</span><span>MoM Chg</span><span>Risk</span>
@@ -95,7 +95,7 @@ export default function RiskAnalyzer() {
 
           {/* ML predictions list */}
           <Panel>
-            <PanelHeader title="ML Predictions — Recent Events"
+            <PanelHeader title="ML Predictions - Recent Events"
               right={<span className="text-[9px]" style={{ color: 'var(--accent)' }}>XGBoost · rule-based fallback</span>} />
             {(events || []).slice(0, 8).map((ev, i) => (
               <div key={i} className="flex items-start gap-3 px-5 py-3.5 border-b"
@@ -129,7 +129,7 @@ export default function RiskAnalyzer() {
             <PanelHeader title="Risk Score Trend" />
             <div className="p-4">
               {chartData.length === 0
-                ? <Empty message="Awaiting events…" />
+                ? <Empty message="Awaiting events..." />
                 : (
                   <ResponsiveContainer width="100%" height={140}>
                     <BarChart data={chartData} margin={{ top: 4, right: 4, bottom: 4, left: -20 }}>
@@ -158,7 +158,7 @@ export default function RiskAnalyzer() {
               <PanelHeader title="Latest Prediction Detail" />
               <div className="p-4">
                 <div className="text-[10px] mb-3" style={{ color: 'var(--muted)' }}>
-                  {ev.headline?.slice(0, 60)}…
+                  {ev.headline?.slice(0, 60)}...
                 </div>
                 {Object.entries(ev.probabilities || {}).map(([label, prob]) => (
                   <div key={label} className="flex items-center gap-2 mb-2">

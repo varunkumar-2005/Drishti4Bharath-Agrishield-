@@ -1,6 +1,6 @@
-import React from 'react'
+﻿import React from 'react'
 
-// ── Risk pill ──────────────────────────────────────────────────────────────────
+// â”€â”€ Risk pill â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function RiskPill({ label }) {
   const styles = {
     CRITICAL: 'bg-red-500/20 text-red-400 border border-red-500/40',
@@ -9,13 +9,13 @@ export function RiskPill({ label }) {
     LOW: 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30',
   }
   return (
-    <span className={`inline-block px-2.5 py-1 rounded text-[10px] font-bold tracking-widest uppercase whitespace-nowrap ${styles[label] || styles.LOW}`}>
+    <span className={`inline-block px-2.5 py-1 rounded text-[11px] font-bold tracking-widest uppercase whitespace-nowrap ${styles[label] || styles.LOW}`}>
       {label}
     </span>
   )
 }
 
-// ── Panel wrapper ──────────────────────────────────────────────────────────────
+// â”€â”€ Panel wrapper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function Panel({ children, className = '' }) {
   return (
     <div className={`rounded-xl border overflow-hidden ${className}`}
@@ -29,7 +29,7 @@ export function PanelHeader({ title, right, icon }) {
   return (
     <div className="flex items-center justify-between px-5 py-4 border-b"
       style={{ borderColor: 'var(--border)' }}>
-      <div className="flex items-center gap-2 font-syne font-bold text-[14px] text-[var(--text)]">
+      <div className="flex items-center gap-2 font-syne font-bold text-[18px] text-[var(--text)]">
         {icon && <span>{icon}</span>}
         {title}
       </div>
@@ -38,7 +38,7 @@ export function PanelHeader({ title, right, icon }) {
   )
 }
 
-// ── KPI card ───────────────────────────────────────────────────────────────────
+// â”€â”€ KPI card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function KpiCard({ label, value, sub, badge, color = 'green', topLine = true }) {
   const colors = {
     green: { bar: 'var(--accent)', val: 'var(--accent)' },
@@ -54,11 +54,11 @@ export function KpiCard({ label, value, sub, badge, color = 'green', topLine = t
       {topLine && (
         <div className="absolute top-0 left-0 right-0 h-0.5" style={{ background: c.bar }} />
       )}
-      <div className="text-[11px] uppercase tracking-widest mb-2" style={{ color: 'var(--muted)' }}>{label}</div>
-      <div className="font-syne font-extrabold text-3xl leading-none mb-1.5" style={{ color: c.val }}>{value}</div>
-      {sub && <div className="text-[11px]" style={{ color: 'var(--muted)' }}>{sub}</div>}
+      <div className="text-[12px] uppercase tracking-widest mb-2" style={{ color: 'var(--muted)' }}>{label}</div>
+      <div className="font-syne font-extrabold text-4xl leading-none mb-1.5" style={{ color: c.val }}>{value}</div>
+      {sub && <div className="text-[12px]" style={{ color: 'var(--muted)' }}>{sub}</div>}
       {badge && (
-        <span className="absolute top-3.5 right-3.5 text-[10px] px-1.5 py-0.5 rounded-full font-semibold"
+        <span className="absolute top-3.5 right-3.5 text-[11px] px-2 py-0.5 rounded-full font-semibold"
           style={{ background: `${c.bar}22`, color: c.val }}>
           {badge}
         </span>
@@ -67,7 +67,7 @@ export function KpiCard({ label, value, sub, badge, color = 'green', topLine = t
   )
 }
 
-// ── Live dot ───────────────────────────────────────────────────────────────────
+// â”€â”€ Live dot â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function LiveDot({ color = 'var(--danger)' }) {
   return (
     <span className="inline-block w-[7px] h-[7px] rounded-full animate-pulse-dot"
@@ -75,7 +75,7 @@ export function LiveDot({ color = 'var(--danger)' }) {
   )
 }
 
-// ── Loading spinner ────────────────────────────────────────────────────────────
+// â”€â”€ Loading spinner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function Spinner() {
   return (
     <div className="flex items-center justify-center p-12">
@@ -85,17 +85,17 @@ export function Spinner() {
   )
 }
 
-// ── Empty state ────────────────────────────────────────────────────────────────
+// â”€â”€ Empty state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function Empty({ message = 'No data yet' }) {
   return (
     <div className="flex flex-col items-center justify-center p-12 gap-2">
-      <div className="text-2xl opacity-30">◈</div>
-      <div className="text-[12px]" style={{ color: 'var(--muted)' }}>{message}</div>
+      <div className="text-2xl opacity-40">â—ˆ</div>
+      <div className="text-[14px]" style={{ color: 'var(--muted)' }}>{message}</div>
     </div>
   )
 }
 
-// ── Advisory card ──────────────────────────────────────────────────────────────
+// â”€â”€ Advisory card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function AdvCard({ type = 'action', title, children, tags = [] }) {
   const styles = {
     action: { bar: 'var(--accent)', label: 'var(--accent)', bg: 'rgba(0,229,160,.04)' },
@@ -107,13 +107,13 @@ export function AdvCard({ type = 'action', title, children, tags = [] }) {
   return (
     <div className="relative rounded-lg border mb-3 p-4" style={{ background: s.bg, borderColor: 'var(--border)' }}>
       <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-lg" style={{ background: s.bar }} />
-      <div className="text-[10px] uppercase tracking-widest font-bold mb-1.5 ml-1" style={{ color: s.label }}>{title}</div>
-      <div className="text-[14px] leading-relaxed font-serif ml-1" style={{ color: 'var(--text)' }}>{children}</div>
+      <div className="text-[11px] uppercase tracking-widest font-bold mb-1.5 ml-1" style={{ color: s.label }}>{title}</div>
+      <div className="text-[15px] leading-relaxed font-serif ml-1" style={{ color: 'var(--text)' }}>{children}</div>
       {tags.length > 0 && (
         <div className="flex flex-wrap gap-1 mt-2 ml-1">
           {tags.map(t => (
-            <span key={t} className="text-[10px] px-1.5 py-0.5 rounded border"
-              style={{ background: 'rgba(61,158,255,.1)', borderColor: 'rgba(61,158,255,.25)', color: 'var(--accent3)' }}>
+            <span key={t} className="text-[11px] px-1.5 py-0.5 rounded border"
+              style={{ background: 'rgba(61,158,255,.1)', borderColor: 'rgba(61,158,255,.3)', color: 'var(--accent3)' }}>
               {t}
             </span>
           ))}
@@ -123,7 +123,7 @@ export function AdvCard({ type = 'action', title, children, tags = [] }) {
   )
 }
 
-// ── Format USD ─────────────────────────────────────────────────────────────────
+// â”€â”€ Format USD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function fmtUSD(val) {
   if (!val) return '$0'
   if (val >= 1e9) return `$${(val / 1e9).toFixed(1)}B`
@@ -132,7 +132,7 @@ export function fmtUSD(val) {
   return `$${val.toFixed(0)}`
 }
 
-// ── Format time ago ────────────────────────────────────────────────────────────
+// â”€â”€ Format time ago â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function timeAgo(isoString) {
   if (!isoString) return ''
   const diff = (Date.now() - new Date(isoString).getTime()) / 1000

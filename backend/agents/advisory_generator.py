@@ -20,6 +20,7 @@ AWS_REGION = os.getenv("AWS_REGION", "ap-south-1")
 BEDROCK_MODEL = os.getenv("BEDROCK_MODEL", "amazon.nova-lite-v1:0")
 FALLBACK_MODEL = os.getenv("BEDROCK_FALLBACK_MODEL", "amazon.nova-lite-v1:0")
 MAX_TOKENS = 2000
+ENABLE_BEDROCK = os.getenv("ENABLE_BEDROCK", "true").lower() == "true"
 
 
 class AdvisoryGenerator:
@@ -54,7 +55,7 @@ class AdvisoryGenerator:
         raw_text = None
         model_used = "none"
 
-        if self._client:
+        if self._client and ENABLE_BEDROCK:
             # Try primary model
             for model_id in [BEDROCK_MODEL, FALLBACK_MODEL]:
                 try:
@@ -144,6 +145,7 @@ Shock Intensity: {country_stats.get("Shock_Intensity", 0)}
 Top Commodities: {", ".join(country_stats.get("top_commodities", [])[:4])}
 
 TASK: Generate specific, actionable advisories for FOUR stakeholder groups based on the above real data.
+For policy_makers, target Government of India decision-makers (Agriculture, Commerce, Food ministries) with implementation-ready steps.
 DO NOT be generic. Reference specific commodities, states, farmers, dollar values, and timelines above.
 Respond in JSON format exactly like this:
 

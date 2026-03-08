@@ -122,7 +122,13 @@ class EventCollector:
                 avg_tone = 0.0
 
             ts = str(raw.get("timestamp") or "")
-            event_id = self._make_id(url or title)
+            # In mock/file mode, allow updated headlines with same URL to be treated as new.
+            # This prevents stale dedupe when users edit local JSON/CSV test data.
+            provided_id = str(raw.get("event_id") or raw.get("id") or "").strip()
+            if provided_id:
+                event_id = provided_id
+            else:
+                event_id = self._make_id(f"{url}|{title}|{source_country}|{avg_tone}")
             if event_id in seen_ids:
                 continue
             seen_ids.add(event_id)

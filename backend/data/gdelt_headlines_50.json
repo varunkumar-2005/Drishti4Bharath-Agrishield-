@@ -1,32 +1,158 @@
-[
+﻿[
   {
-    "headline": "India explores alternate edible oil routes amid Red Sea shipping disruptions",
+    "event_id": "mock-001",
+    "headline": "Iran-Israel conflict raises fears of Strait of Hormuz blockade disrupting global oil and fertilizer shipments",
     "url": "https://example.com/news-1",
-    "country": "GLOBAL",
-    "avg_tone": -2.4
+    "country": "IRAN",
+    "event_type": "CONFLICT",
+    "severity_pct": 92,
+    "estimated_goldstein": -9.2,
+    "avg_tone": -6.2,
+    "affected_commodities": "Fuel,Fertilizer,Edible Oil,Rice",
+    "affected_states": "Punjab,Gujarat,Andhra Pradesh,Haryana",
+    "risk_label": "CRITICAL"
   },
   {
-    "headline": "New export tariff discussions may impact Indian rice trade in West Asia",
+    "event_id": "mock-002",
+    "headline": "Indian basmati rice exports stall as Middle East war disrupts Gulf shipping routes",
     "url": "https://example.com/news-2",
     "country": "IRAN",
-    "avg_tone": -3.1
+    "event_type": "CONFLICT",
+    "severity_pct": 78,
+    "estimated_goldstein": -8.3,
+    "avg_tone": -5.5,
+    "affected_commodities": "Rice,Spices,Shrimp",
+    "affected_states": "Punjab,Haryana,Kerala,Andhra Pradesh",
+    "risk_label": "CRITICAL"
   },
   {
-    "headline": "Fertilizer shipment delays raise kharif season cost concerns for farmers",
+    "event_id": "mock-003",
+    "headline": "Rising freight and insurance costs after Hormuz crisis threaten India's agricultural trade",
     "url": "https://example.com/news-3",
     "country": "GLOBAL",
-    "avg_tone": -2.7
+    "event_type": "ECONOMIC",
+    "severity_pct": 62,
+    "estimated_goldstein": -6.1,
+    "avg_tone": -4.4,
+    "affected_commodities": "Rice,Wheat,Edible Oil,Fertilizer",
+    "affected_states": "Nationwide",
+    "risk_label": "HIGH"
   },
   {
-    "headline": "Conflict-linked insurance premiums rise for commodity shipping lanes",
+    "event_id": "mock-004",
+    "headline": "United States imposes higher tariffs on Indian exports amid escalating trade dispute",
     "url": "https://example.com/news-4",
-    "country": "GLOBAL",
-    "avg_tone": -3.5
+    "country": "USA",
+    "event_type": "TARIFF",
+    "severity_pct": 55,
+    "estimated_goldstein": -7.1,
+    "avg_tone": -4.7,
+    "affected_commodities": "Rice,Cotton,Spices,Shrimp",
+    "affected_states": "Punjab,Gujarat,Kerala,Tamil Nadu",
+    "risk_label": "CRITICAL"
   },
   {
-    "headline": "Indian spice exporters evaluate rerouting options after sanctions update",
+    "event_id": "mock-005",
+    "headline": "India considers retaliatory duties after US trade penalties on steel and agricultural goods",
     "url": "https://example.com/news-5",
-    "country": "UAE",
-    "avg_tone": -1.8
+    "country": "USA",
+    "event_type": "TRADE_POLICY",
+    "severity_pct": 42,
+    "estimated_goldstein": -5.6,
+    "avg_tone": -3.9,
+    "affected_commodities": "Cotton,Spices,Tea",
+    "affected_states": "Gujarat,Kerala,Assam",
+    "risk_label": "HIGH"
+  },
+  {
+    "event_id": "mock-006",
+    "headline": "US tariff pressure on Indian goods threatens competitiveness of farm and textile exports",
+    "url": "https://example.com/news-6",
+    "country": "USA",
+    "event_type": "TARIFF",
+    "severity_pct": 34,
+    "estimated_goldstein": -4.8,
+    "avg_tone": -3.3,
+    "affected_commodities": "Cotton,Rice,Textile",
+    "affected_states": "Gujarat,Punjab,Maharashtra",
+    "risk_label": "MEDIUM"
+  },
+  {
+    "event_id": "mock-007",
+    "headline": "India reviews safeguard tariffs amid surge of low-cost Chinese agricultural equipment imports",
+    "url": "https://example.com/news-7",
+    "country": "CHINA",
+    "event_type": "TRADE_POLICY",
+    "severity_pct": 28,
+    "estimated_goldstein": -4.2,
+    "avg_tone": -3.0,
+    "affected_commodities": "Maize,Wheat,Fertilizer Equipment",
+    "affected_states": "Uttar Pradesh,Haryana,Punjab",
+    "risk_label": "MEDIUM"
+  },
+  {
+    "event_id": "mock-008",
+    "headline": "China-India trade tensions rise as both countries evaluate new duties on key industrial goods",
+    "url": "https://example.com/news-8",
+    "country": "CHINA",
+    "event_type": "TARIFF",
+    "severity_pct": 38,
+    "estimated_goldstein": -5.2,
+    "avg_tone": -3.6,
+    "affected_commodities": "Tea,Spices,Cotton",
+    "affected_states": "Assam,Kerala,Gujarat",
+    "risk_label": "HIGH"
+  },
+  {
+    "event_id": "mock-009",
+    "headline": "Indian manufacturers warn of dumping risks from Chinese imports, seek protective tariffs",
+    "url": "https://example.com/news-9",
+    "country": "CHINA",
+    "event_type": "TRADE_POLICY",
+    "severity_pct": 24,
+    "estimated_goldstein": -3.8,
+    "avg_tone": -2.8,
+    "affected_commodities": "Cotton,Spices,Onion",
+    "affected_states": "Maharashtra,Gujarat,Karnataka",
+    "risk_label": "MEDIUM"
+  },
+  {
+    "event_id": "mock-010",
+    "headline": "Global fertilizer prices surge as Middle East conflict and shipping disruptions tighten supply",
+    "url": "https://example.com/news-10",
+    "country": "GLOBAL",
+    "event_type": "ECONOMIC",
+    "severity_pct": 67,
+    "estimated_goldstein": -6.8,
+    "avg_tone": -4.9,
+    "affected_commodities": "Fertilizer,Urea,DAP,Rice,Wheat",
+    "affected_states": "Nationwide",
+    "risk_label": "CRITICAL"
+  },
+  {
+    "event_id": "mock-011",
+    "headline": "India and USA agree phased tariff rollback for select agri exports after emergency talks",
+    "url": "https://example.com/news-11",
+    "country": "USA",
+    "event_type": "DIPLOMATIC",
+    "severity_pct": 12,
+    "estimated_goldstein": 3.8,
+    "avg_tone": 2.4,
+    "affected_commodities": "Rice,Spices,Shrimp",
+    "affected_states": "Punjab,Kerala,Andhra Pradesh",
+    "risk_label": "LOW"
+  },
+  {
+    "event_id": "mock-012",
+    "headline": "Ceasefire corridor in Gulf partially restores shipping lanes for Indian food exports",
+    "url": "https://example.com/news-12",
+    "country": "IRAN",
+    "event_type": "DIPLOMATIC",
+    "severity_pct": 18,
+    "estimated_goldstein": 2.6,
+    "avg_tone": 1.7,
+    "affected_commodities": "Rice,Wheat,Edible Oil",
+    "affected_states": "Punjab,Haryana,Andhra Pradesh",
+    "risk_label": "LOW"
   }
 ]
