@@ -4,7 +4,7 @@
 
 ---
 
-## Architecture
+## Architecture 
 
 ```
 GDELT API (free, real-time)
