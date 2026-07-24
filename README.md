@@ -176,4 +176,22 @@ PIPELINE_INTERVAL_SECONDS=90
 
 ---
 
-Built for **AI 4 Bharat Hackathon** — AWS Track
+## 🤖 Google Gemini Models Usage
+
+**Google Gemini** powers the core AI reasoning and interaction capabilities across the platform, utilizing specific next-generation models for different tasks:
+
+* **Interactions API (`antigravity-preview-05-2026`)**: Acts as the central orchestrator, seamlessly routing requests between the different specialized Gemini agents and tools across the platform.
+* **Gemini 3.5 Flash (`gemini-3.5-flash`)**: Utilized by the Event Orchestrator for high-speed, low-latency extraction of geopolitical entities, sentiment analysis, and severity scoring from thousands of real-time global news headlines. It also utilizes **Computer Use** capabilities for advanced automation workflows.
+* **Gemini Omni (`gemini-omni-flash-preview`)**: Powers the Multimodal Farmer Assistant's core reasoning engine, understanding complex agronomic queries, processing voice transcriptions, and maintaining long-context conversational memory.
+* **Computer Vision (Disease Detection)**: Farmers can upload images of affected crops. **Nano Banana 2 Lite (`gemini-3.1-flash-lite-image`)** analyzes these images to quickly identify visual symptoms of crop diseases or pest infestations with minimal latency.
+* **Live Audio & Translation**: 
+    * **Gemini Flash Live (`gemini-3.1-flash-live-preview`)** processes raw voice and audio context directly from farmers out in the field.
+    * **Gemini Live Translate (`gemini-3.5-live-translate-preview`)** translates queries from 10+ regional Indian languages (Hindi, Punjabi, Tamil, etc.) into English for processing in real-time.
+    * **Gemini 3.1 Flash Text-to-Speech (`gemini-3.1-flash-tts-preview`)** synthesizes expert agronomic advice (e.g., pesticide recommendations, soil health) back into the farmer's native language as a highly natural voice output.
+* **Strict Boundary Constraints**: Gemini is explicitly instructed **never** to predict agricultural risk or market prices directly. All quantitative risk scores, predictions, and financial forecasts are generated purely by the deterministic ML pipeline (XGBoost/scikit-learn).
+
+---
+
+<div align="center">
+  <i>Empowering agriculture against global uncertainty.</i>
+</div>
