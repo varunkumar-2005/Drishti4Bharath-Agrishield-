@@ -87,13 +87,16 @@ class EventCollector:
 
         try:
             if ext == ".json":
-                with open(file_path, "r", encoding="utf-8") as f:
+                with open(file_path, "r", encoding="utf-8-sig") as f:
                     data = json.load(f)
                 if isinstance(data, list):
                     for item in data:
                         if isinstance(item, str):
                             rows.append({"title": item})
                         elif isinstance(item, dict):
+                            # normalize "headline" -> "title"
+                            if "headline" in item and "title" not in item:
+                                item["title"] = item["headline"]
                             rows.append(item)
             elif ext == ".csv":
                 with open(file_path, "r", encoding="utf-8-sig", newline="") as f:

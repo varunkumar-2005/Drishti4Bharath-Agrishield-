@@ -103,7 +103,7 @@ class EventProcessor:
         Turn a raw GDELT article into a structured event dict.
         Returns None if irrelevant to India agri trade.
         """
-        title = raw_article.get("title", "")
+        title = raw_article.get("title") or raw_article.get("headline", "")
         if not title:
             return None
 

@@ -49,9 +49,12 @@ class AgentOrchestrator:
             if self.store.is_seen(event_id):
                 continue
 
-            # Filter for agri relevance
-            if not self.collector.is_agri_relevant(article.get("title", "")):
-                continue
+            # Filter for agri relevance (skip filter in file mode - headlines are pre-curated)
+            import os
+            if os.getenv("EVENT_SOURCE", "gdelt") not in {"file", "mock", "local"}:
+                title = article.get("title") or article.get("headline", "")
+                if not self.collector.is_agri_relevant(title):
+                    continue
 
             await self._process_article(article)
             new_events += 1

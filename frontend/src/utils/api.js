@@ -14,5 +14,9 @@ export const analyzeHeadline = (headline, source_url = null) =>
   api.post('/analyze', { headline, source_url }).then(r => r.data)
 export const farmerChat = (question, state = null, crop = null, season = null) =>
   api.post('/farmer/chat', { question, state, crop, season }).then(r => r.data)
+export const farmerMultimodalChat = (formData) =>
+  api.post('/farmer/multimodal', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }).then(r => r.data)
 
 export default api

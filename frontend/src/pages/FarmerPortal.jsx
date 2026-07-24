@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { usePolling } from '../hooks/usePolling'
-import { fetchAdvisories, fetchEvents, farmerChat } from '../utils/api'
+import { fetchAdvisories, fetchEvents, farmerMultimodalChat } from '../utils/api'
 import { Panel, PanelHeader, RiskPill, Empty } from '../components/ui'
 
 const CROP_DEFAULTS = [
@@ -19,8 +19,13 @@ export default function FarmerPortal() {
   const [chatState, setChatState] = useState('')
   const [chatCrop, setChatCrop] = useState('')
   const [chatSeason, setChatSeason] = useState('')
+  const [chatLanguage, setChatLanguage] = useState('en')
+  const [chatImage, setChatImage] = useState(null)
+  const [isRecording, setIsRecording] = useState(false)
+  const [audioBlob, setAudioBlob] = useState(null)
   const [chatLoading, setChatLoading] = useState(false)
   const [chatOpen, setChatOpen] = useState(false)
+  const fileInputRef = useRef(null)
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
@@ -56,23 +61,37 @@ export default function FarmerPortal() {
 
   const handleSend = async (e) => {
     e?.preventDefault()
+    e?.preventDefault()
     const question = chatQuestion.trim()
-    if (!question || chatLoading) return
+    if ((!question && !audioBlob && !chatImage) || chatLoading) return
 
-    setMessages(prev => [...prev, { role: 'user', text: question }])
+    const newMessage = { role: 'user', text: question || (audioBlob ? '[Voice Message]' : ''), image: chatImage ? URL.createObjectURL(chatImage) : null }
+    setMessages(prev => [...prev, newMessage])
     setChatQuestion('')
     setChatLoading(true)
 
+    const formData = new FormData()
+    if (question) formData.append('text', question)
+    if (chatState) formData.append('state', chatState)
+    if (chatCrop) formData.append('crop', chatCrop)
+    if (chatSeason) formData.append('season', chatSeason)
+    if (chatLanguage) formData.append('language', chatLanguage)
+    if (chatImage) formData.append('image', chatImage)
+    if (audioBlob) formData.append('audio', audioBlob, 'voice.webm')
+
     try {
-      const res = await farmerChat(question, chatState || null, chatCrop || null, chatSeason || null)
+      const res = await farmerMultimodalChat(formData)
       setMessages(prev => [
         ...prev,
         {
           role: 'assistant',
-          text: res?.answer || 'No response received',
-          model: res?.model_used || '',
+          text: res?.advisory_text || 'No response received',
+          audio: res?.audio_response || null,
+          model: res?.models_used?.join(', ') || '',
         },
       ])
+      setChatImage(null)
+      setAudioBlob(null)
     } catch (err) {
       setMessages(prev => [
         ...prev,
@@ -246,7 +265,18 @@ export default function FarmerPortal() {
               </button>
             </div>
 
-            <div className="px-5 py-3 border-b grid grid-cols-1 sm:grid-cols-3 gap-3" style={{ borderColor: 'var(--border)', background: 'rgba(0,0,0,0.2)' }}>
+            <div className="flex flex-wrap items-center gap-3 px-5 py-3 border-b" style={{ borderColor: 'var(--border)', background: 'rgba(0,0,0,0.2)' }}>
+              <select
+                value={chatLanguage}
+                onChange={e => setChatLanguage(e.target.value)}
+                className="px-3 py-2 rounded-lg border text-[14px] bg-[var(--surface2)] focus:outline-none focus:border-[var(--accent)] transition-colors"
+                style={{ borderColor: 'var(--border)', color: 'var(--text)' }}
+              >
+                <option value="en">English</option>
+                <option value="hi">हिंदी (Hindi)</option>
+                <option value="pa">ਪੰਜਾਬੀ (Punjabi)</option>
+                <option value="mr">मराठी (Marathi)</option>
+              </select>
               <input
                 type="text"
                 value={chatState}
@@ -285,10 +315,16 @@ export default function FarmerPortal() {
                       borderColor: msg.role === 'user' ? 'rgba(61,158,255,.6)' : 'var(--border)',
                     }}
                   >
+                    {msg.image && (
+                      <img src={msg.image} alt="Upload" className="w-full max-w-[200px] rounded-lg mb-3 object-cover border border-white/20" />
+                    )}
                     {msg.text}
+                    {msg.audio && (
+                      <audio controls src={msg.audio} className="mt-3 w-full max-w-[250px] h-8 rounded-lg outline-none" style={{ filter: 'invert(0.9) hue-rotate(180deg) opacity(0.8)' }} />
+                    )}
                     {msg.model && msg.role === 'assistant' && (
                       <div className="mt-2.5 text-[12px] opacity-70">
-                        model: {msg.model}
+                        models: {msg.model}
                       </div>
                     )}
                   </div>
@@ -308,6 +344,42 @@ export default function FarmerPortal() {
             </div>
 
             <form onSubmit={handleSend} className="p-4 border-t flex items-end gap-3 bg-[var(--surface)]" style={{ borderColor: 'var(--border)' }}>
+              <input 
+                type="file" 
+                accept="image/*" 
+                className="hidden" 
+                ref={fileInputRef} 
+                onChange={(e) => { if(e.target.files[0]) setChatImage(e.target.files[0]) }}
+              />
+              <button 
+                type="button" 
+                onClick={() => fileInputRef.current?.click()}
+                className={`p-3 rounded-xl border transition-colors ${chatImage ? 'bg-[var(--accent)] text-[#082014]' : 'bg-transparent text-[var(--accent)]'}`}
+                style={{ borderColor: 'var(--accent)' }}
+                aria-label="Upload Image"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              </button>
+              
+              <button
+                type="button"
+                onClick={() => {
+                  if (isRecording) {
+                    setIsRecording(false)
+                    // Mock recording stop and generate empty blob for demo
+                    setAudioBlob(new Blob(['mock-audio'], { type: 'audio/webm' }))
+                  } else {
+                    setIsRecording(true)
+                    setAudioBlob(null)
+                  }
+                }}
+                className={`p-3 rounded-xl border transition-colors ${isRecording ? 'bg-[var(--danger)] text-white' : audioBlob ? 'bg-[var(--accent2)] text-[#082014]' : 'bg-transparent text-[var(--accent)]'}`}
+                style={{ borderColor: isRecording ? 'var(--danger)' : audioBlob ? 'var(--accent2)' : 'var(--accent)' }}
+                aria-label="Record Voice"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+              </button>
+
               <textarea
                 rows={2}
                 value={chatQuestion}
@@ -324,7 +396,7 @@ export default function FarmerPortal() {
               />
               <button
                 type="submit"
-                disabled={chatLoading || !chatQuestion.trim()}
+                disabled={chatLoading || (!chatQuestion.trim() && !audioBlob && !chatImage)}
                 className="px-6 py-3.5 rounded-xl text-[15px] font-bold border transition-all hover:bg-[var(--accent)] hover:text-[#082014] disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-[var(--accent)] bg-transparent"
                 style={{ borderColor: 'var(--accent)', color: 'var(--accent)' }}
               >
